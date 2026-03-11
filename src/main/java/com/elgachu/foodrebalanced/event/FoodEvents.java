@@ -4,6 +4,7 @@ import com.elgachu.foodrebalanced.config.FoodConfigEntry;
 import com.elgachu.foodrebalanced.config.FoodConfig;
 import com.elgachu.foodrebalanced.config.EffectEntry;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
@@ -11,7 +12,10 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.CakeBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -21,7 +25,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod.EventBusSubscriber
 public class FoodEvents {
-
+    // This Function allows players to eat food even when not hungry if the config entry for that food has requiresHunger set to false
     @SubscribeEvent
     public static void onRightClick(PlayerInteractEvent.RightClickItem event) {
 
@@ -45,6 +49,7 @@ public class FoodEvents {
             event.setCanceled(true);
         }
     }
+    // This function allows changing the eating speed of food based on the config entry for that food
     @SubscribeEvent
     public static void onUseStart(LivingEntityUseItemEvent.Start event) {
 
@@ -67,6 +72,25 @@ public class FoodEvents {
         }
 
     }
+    // This is a special function for cake since it is a block and not an item. For now it only registers the eating of cake in the console.
+    @SubscribeEvent
+    public static void onCakeEat(PlayerInteractEvent.RightClickBlock event) {
+        
+        
+        Level level = event.getLevel();
+        BlockPos pos = event.getPos();
+        BlockState state = level.getBlockState(pos);
+
+        if (!(state.getBlock() instanceof CakeBlock)) return;
+
+        Player player = event.getEntity();
+
+        if (level.isClientSide()) return;
+
+        System.out.println("Player ate cake!");
+        
+    }
+    // This function applies the nutrition, saturation, and effects from the config entry for the eaten food. It also removes vanilla effects if replaceVanillaEffects is set to true in the config entry for that food.
     @SubscribeEvent
     public static void onItemEaten(LivingEntityUseItemEvent.Finish event) {
 
