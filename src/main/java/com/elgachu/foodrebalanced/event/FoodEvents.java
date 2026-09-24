@@ -90,7 +90,7 @@ public class FoodEvents {
         Player player = event.getEntity();
 
         if (level.isClientSide()) return;
-
+        
         System.out.println("Player ate cake!");
         
     }
@@ -158,7 +158,8 @@ public class FoodEvents {
                     }
                 }
             }
-        } else if(config.removeEffects != null && !config.removeEffects.isEmpty())
+        }
+        if(config.removeEffects != null && !config.removeEffects.isEmpty())
         {
             for (var effectInstance : new ArrayList<>(player.getActiveEffects())) {
 
@@ -170,7 +171,8 @@ public class FoodEvents {
                 }
             }
         }
-        else return;
+        
+        return;
 
         
     }
