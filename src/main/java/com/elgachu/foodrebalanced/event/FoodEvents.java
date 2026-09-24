@@ -2,9 +2,13 @@ package com.elgachu.foodrebalanced.event;
 
 import com.elgachu.foodrebalanced.config.FoodConfigEntry;
 import com.elgachu.foodrebalanced.config.FoodConfig;
+
+import java.util.ArrayList;
+
 import com.elgachu.foodrebalanced.config.EffectEntry;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
@@ -122,7 +126,7 @@ public class FoodEvents {
 
         player.getFoodData().eat(hungerDifference, saturationDifference);
        
-        // Replace vanilla effects if configured
+        // Replace vanilla effects if configured 
         if (config.replaceVanillaEffects) {
 
             if (food != null && food.getEffects() != null) {
@@ -135,24 +139,39 @@ public class FoodEvents {
         }
 
         // Apply config effects
-        if (config.effects == null || config.effects.isEmpty()) return;
+        if (config.effects != null && !config.effects.isEmpty())
+        {
+            for (EffectEntry effectEntry : config.effects) {
 
-        for (EffectEntry effectEntry : config.effects) {
+                if (player.getRandom().nextFloat() <= effectEntry.chance) {
 
-            if (player.getRandom().nextFloat() <= effectEntry.chance) {
+                    MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(
+                            new ResourceLocation(effectEntry.effect)
+                    );
+                    
+                    if (effect != null) {
+                        player.addEffect(new MobEffectInstance(
+                                effect,
+                                effectEntry.duration,
+                                effectEntry.amplifier
+                        ));
+                    }
+                }
+            }
+        } else if(config.removeEffects != null && !config.removeEffects.isEmpty())
+        {
+            for (var effectInstance : new ArrayList<>(player.getActiveEffects())) {
 
-                MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(
-                        new ResourceLocation(effectEntry.effect)
-                );
+                var effect = effectInstance.getEffect();
+                var effectName = BuiltInRegistries.MOB_EFFECT.getKey(effect).toString();
 
-                if (effect != null) {
-                    player.addEffect(new MobEffectInstance(
-                            effect,
-                            effectEntry.duration,
-                            effectEntry.amplifier
-                    ));
+                if (config.removeEffects.contains(effectName)) {
+                    player.removeEffect(effect);
                 }
             }
         }
+        else return;
+
+        
     }
 }
