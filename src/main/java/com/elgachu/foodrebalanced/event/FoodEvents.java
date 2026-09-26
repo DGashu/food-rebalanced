@@ -7,8 +7,7 @@ import java.util.ArrayList;
 
 import com.elgachu.foodrebalanced.config.EffectEntry;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
@@ -16,16 +15,21 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.gameevent.BlockPositionSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+
 
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.common.extensions.IForgeItem;
 
 @Mod.EventBusSubscriber
 public class FoodEvents {
@@ -82,16 +86,36 @@ public class FoodEvents {
         
         
         Level level = event.getLevel();
+        if(level.isClientSide()) return;
         BlockPos pos = event.getPos();
-        BlockState state = level.getBlockState(pos);
+        BlockState oldState = level.getBlockState(pos);
+        
+        if (!(oldState.getBlock() instanceof CakeBlock)) return;
 
-        if (!(state.getBlock() instanceof CakeBlock)) return;
-
+        int oldBites = oldState.getValue(CakeBlock.BITES);
         Player player = event.getEntity();
 
-        if (level.isClientSide()) return;
+        FoodConfigEntry config = FoodConfig.get(Items.CAKE);
         
-        System.out.println("Player ate cake!");
+         level.getServer().execute(() -> {
+        
+        BlockState newState = level.getBlockState(pos);
+
+        if (newState.getBlock() instanceof CakeBlock) {
+
+            int newBites = newState.getValue(CakeBlock.BITES);
+
+            if (newBites > oldBites) {
+                System.out.println("Cake was eaten!");
+                int hungerDifference = config.nutrition - 2;
+                float saturationDifference = config.saturation - 0.1F;
+                player.getFoodData().eat(hungerDifference, saturationDifference);
+                if (config.effects != null && !config.effects.isEmpty()) applyEffects(config, player);
+                if(config.removeEffects != null && !config.removeEffects.isEmpty()) removeEffects(config, player); 
+            }
+        }
+    });
+
         
     }
     // This function applies the nutrition, saturation, and effects from the config entry for the eaten food. It also removes vanilla effects if replaceVanillaEffects is set to true in the config entry for that food.
@@ -105,11 +129,23 @@ public class FoodEvents {
         Item item = stack.getItem();
 
         if (!item.isEdible()) return;
-        System.out.println("Food eaten: " + item.getDescriptionId());
+        IForgeItem snack = stack.getItem();
+        System.out.println("Food eaten: " + snack.toString());
         FoodConfigEntry config = FoodConfig.get(item);
         if (config == null) return;
+        foodChanges(config, stack, player);
+        if (config.effects != null && !config.effects.isEmpty()) applyEffects(config, player);
+        if(config.removeEffects != null && !config.removeEffects.isEmpty()) removeEffects(config, player); 
+        return;
 
-        FoodProperties food = item.getFoodProperties();
+        
+    }
+
+    //Apply food value changes
+    public static void foodChanges(FoodConfigEntry config, ItemStack stack, Player player)
+    {
+        
+        FoodProperties food = stack.getFoodProperties(null);
 
         int vanillaNutrition = food.getNutrition();
         float vanillaSaturation = food.getSaturationModifier();
@@ -125,7 +161,7 @@ public class FoodEvents {
         float saturationDifference = configSaturationValue - vanillaSaturationValue;
 
         player.getFoodData().eat(hungerDifference, saturationDifference);
-       
+
         // Replace vanilla effects if configured 
         if (config.replaceVanillaEffects) {
 
@@ -137,43 +173,39 @@ public class FoodEvents {
 
             }
         }
-
-        // Apply config effects
-        if (config.effects != null && !config.effects.isEmpty())
-        {
-            for (EffectEntry effectEntry : config.effects) {
-
-                if (player.getRandom().nextFloat() <= effectEntry.chance) {
-
-                    MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(
-                            new ResourceLocation(effectEntry.effect)
-                    );
-                    
-                    if (effect != null) {
-                        player.addEffect(new MobEffectInstance(
-                                effect,
-                                effectEntry.duration,
-                                effectEntry.amplifier
-                        ));
-                    }
-                }
-            }
-        }
-        if(config.removeEffects != null && !config.removeEffects.isEmpty())
-        {
-            for (var effectInstance : new ArrayList<>(player.getActiveEffects())) {
-
-                var effect = effectInstance.getEffect();
-                var effectName = BuiltInRegistries.MOB_EFFECT.getKey(effect).toString();
-
-                if (config.removeEffects.contains(effectName)) {
-                    player.removeEffect(effect);
-                }
-            }
-        }
-        
-        return;
-
-        
     }
+
+    public static void applyEffects(FoodConfigEntry config, Player player)
+    {
+        for (EffectEntry effectEntry : config.effects) {
+
+            if (player.getRandom().nextFloat() <= effectEntry.chance) {
+                
+                MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(
+                        ResourceLocation.parse(effectEntry.effect)
+                );
+                
+                if (effect != null) {
+                    player.addEffect(new MobEffectInstance(
+                            effect,
+                            effectEntry.duration,
+                            effectEntry.amplifier
+                    ));
+                }
+            }
+        }
+    }
+    public static void removeEffects(FoodConfigEntry config, Player player)
+    {
+        for (var effectInstance : new ArrayList<>(player.getActiveEffects())) {
+
+            var effect = effectInstance.getEffect();
+            var effectName = ForgeRegistries.MOB_EFFECTS.getKey(effect).toString();
+
+            if (config.removeEffects.contains(effectName)) {
+                player.removeEffect(effect);
+            }
+        }
+    }
+
 }

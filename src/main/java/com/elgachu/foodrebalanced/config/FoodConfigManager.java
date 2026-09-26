@@ -44,30 +44,31 @@ public class FoodConfigManager {
         JsonObject root = new JsonObject();
 
         JsonArray 
-            stewEffects = effects(createEffect("minecraft:regeneration", 600, 0, 1.0f)), 
-            cookieEffects = effects(createEffect("minecraft:speed", 100, 0, 1.0f)),
-            pumpkinPieEffects = effects(createEffect("minecraft:haste", 400, 0, 1.0f)),
-            goldenCarrotEffects = effects(createEffect("minecraft:night_vision", 300, 0, 1.0f)),
-            glowBerryEffects = effects(createEffect("minecraft:glowing", 200, 0, 1.0f)),
-            pufferfishEffects = effects(createEffect("minecraft:water_breathing", 400, 0, 1.0f)),
+            stewEffects = effects(createEffect("minecraft:regeneration", 810, 0, 1.0f)), 
+            cookieEffects = effects(createEffect("minecraft:speed", 600, 0, 1.0f)),
+            pumpkinPieEffects = effects(createEffect("minecraft:haste", 3600, 0, 1.0f)),
+            cakeEffects = effects(createEffect("minecraft:speed", 6000, 0, 1.0f),createEffect("minecraft:resistance", 6000, 0, 1.0f),createEffect("minecraft:absorption", 6000, 0, 1.0f)),
+            goldenCarrotEffects = effects(createEffect("minecraft:night_vision", 3600, 0, 1.0f)),
+            glowBerryEffects = effects(createEffect("minecraft:glowing", 600, 0, 1.0f)),
+            pufferfishEffects = effects(createEffect("minecraft:water_breathing", 3600, 0, 1.0f)),
             honeyBottleEffects = effects(createEffect("minecraft:instant_health", 0, 0, 1.0f)),
             driedKelpRemoveEffects = removeEffects("minecraft:poison", "minecraft:nausea"),
             beetrootSoupEffects = effects(createEffect("minecraft:resistance", 3600, 0, 1.0f)),
-            rabbitStewEffects = effects(createEffect("minecraft:speed", 6000, 1, 1.0f), createEffect("minecraft:jump_boost", 6000, 0, 1.0f));
+            rabbitStewEffects = effects(createEffect("minecraft:speed", 3600, 1, 1.0f), createEffect("minecraft:jump_boost", 3600, 0, 1.0f));
         food(root, "minecraft:mushroom_stew",
-            createFood(true, 6, 0.5f, true, 40, stewEffects, null));
+            createFood(true, 6, 7.2f, true, 40, stewEffects, null));
 
         food(root, "minecraft:honey_bottle",
-            createFood(false, 6, 0.1f, null, 16, honeyBottleEffects, null));
+            createFood(false, 6, 1.2f, null, 16, honeyBottleEffects, null));
 
         food(root, "minecraft:cookie",
-            createFood(false, 2, 0.2f, null, 16, cookieEffects, null));
+            createFood(false, 2, 0.4f, null, 16, cookieEffects, null));
 
         food(root, "minecraft:pumpkin_pie",
-            createFood(true, 8, 0.8f, null, 32, pumpkinPieEffects, null));
+            createFood(true, 8, 4.8f, null, 32, pumpkinPieEffects, null));
 
         food(root, "minecraft:golden_carrot",
-            createFood(false, 6, 0.8f, null, 20, goldenCarrotEffects, null));
+            createFood(false, 6, 2.0f, null, 20, goldenCarrotEffects, null));
         
         food(root, "minecraft:glow_berries",
             createFood(false, 2, 0.2f, null, 16, glowBerryEffects, null));
@@ -76,21 +77,21 @@ public class FoodConfigManager {
             createFood(false, 1, 0.1f, null, 32, pufferfishEffects, null));
 
         food(root, "minecraft:beetroot_soup",
-            createFood(true, 6, 0.5f, true, 40, beetrootSoupEffects, null));
+            createFood(true, 6, 7.2f, true, 40, beetrootSoupEffects, null));
 
         food(root, "minecraft:rabbit_stew",
-            createFood(true, 10, 0.6f, true, 40, rabbitStewEffects, null));
+            createFood(true, 10, 12.0f, true, 40, rabbitStewEffects, null));
 
         food(root, "minecraft:cake",
-            createFood(true, 2, 0.1f, null, 0, null, null));
+            createFood(true, 2, 0.4f, null, 0, cakeEffects, null));
 
         food(root, "minecraft:dried_kelp",
             createFood(false, 1, 0.2f, null, 16, null, driedKelpRemoveEffects));
 
         food(root, "minecraft:apple",
-            createFood(true, 4, 0.6f, null, 20, null, null));
+            createFood(true, 4, 2.4f, null, 20, null, null));
         food(root, "minecraft:carrot",
-            createFood(true, 3, 1.f, null, 20, null, null));
+            createFood(true, 3, 3.6f, null, 20, null, null));
         food(root, "minecraft:sweet_berries",
             createFood(true, 2, 0.2f, null, 16, null, null));
 
