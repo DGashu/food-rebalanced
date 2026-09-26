@@ -31,7 +31,7 @@ public class FoodConfig {
 
             for (String key : root.keySet()) {
 
-                ResourceLocation itemId = new ResourceLocation(key);
+                ResourceLocation itemId = ResourceLocation.parse(key);
 
                 JsonObject entryObject = root.getAsJsonObject(key);
 
