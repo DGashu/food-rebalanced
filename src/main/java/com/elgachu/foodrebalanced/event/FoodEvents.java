@@ -19,7 +19,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.gameevent.BlockPositionSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
